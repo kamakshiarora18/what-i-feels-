@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will You Be Mine? 💘</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Comic Sans MS', cursive;
+      background: linear-gradient(to right, #ffd6e0, #ffe8f0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .active {
+      display: flex;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      margin: 10px;
+    }
+    button {
+      background-color: #ff69b4;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .heart {
+      font-size: 40px;
+      position: absolute;
+      transition: 0.3s ease;
+      cursor: pointer;
+    }
+    .drop-item {
+      font-size: 30px;
+      margin: 10px;
+      cursor: grab;
+    }
+    .drop-zone {
+      width: 300px;
+      height: 200px;
+      border: 2px dashed #ff69b4;
+      border-radius: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      background-color: #fff0f5;
+    }
+    .message {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #d10068;
+    }
+    .card {
+      width: 70px;
+      height: 70px;
+      background: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .card.matched {
+      background-color: #ff69b4;
+      color: white;
+    }
+    #noBtn {
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Password Screen -->
+<div class="screen active" id="passwordScreen">
+  <h2>Enter the magic word to unlock my heart <br>my most fav. person in the world 💘</h2>
+  <input type="password" id="passwordInput" placeholder="Hint: my smile 😊">
+  <button onclick="checkPassword()">Unlock</button>
+  <p class="message" id="passwordMsg"></p>
+</div>
+
+<!-- Level 1 -->
+<div class="screen" id="level1">
+  <h2>Level 1: Catch the Heart! ❤️</h2>
+  <p>Click the heart 15 times!</p>
+  <p id="heartCount">0 / 15</p>
+  <div class="heart" onclick="clickHeart()" id="heart">💖</div>
+</div>
+
+<!-- Level 2 -->
+<div class="screen" id="level2">
+  <h2>Level 2: Match the Emojis 🥹</h2>
+  <div id="emojiBoard" style="display: grid; grid-template-columns: repeat(4, 70px); gap: 12px;"></div>
+  <p id="matchMsg" class="message"></p>
+</div>
+
+<!-- Level 3 -->
+<div class="screen" id="level3">
+  <h2>Level 3: Drop 3 Things I Love 🎁</h2>
+  <div>
+    <span class="drop-item" draggable="true" ondragstart="drag(event)" id="item1">🍫</span>
+    <span class="drop-item" draggable="true" ondragstart="drag(event)" id="item2">🎵</span>
+    <span class="drop-item" draggable="true" ondragstart="drag(event)" id="item3">🐶</span>
+    <span class="drop-item" draggable="true" ondragstart="drag(event)" id="item4">🍺</span>
+    <span class="drop-item" draggable="true" ondragstart="drag(event)" id="item5">💔</span>
+  </div>
+  <div class="drop-zone" id="dropZone" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+  <p class="message" id="dropMsg"></p>
+</div>
+
+<!-- Level 8 -->
+<div class="screen" id="level8">
+  <h2>Level 8: 8 Reasons to Date Me 💌</h2>
+  <p id="reasonText">Click below to reveal a reason...</p>
+  <button onclick="showNextReason()">Show Reason</button>
+</div>
+
+<!-- Final Proposal -->
+<div class="screen" id="finalProposal">
+  <h2>Will you be accept me ? 💍</h2>
+  <button onclick="finalYes()">Yes 💕</button>
+  <button id="noBtn" onmouseover="moveNo()">No 💔</button>
+</div>
+
+<!-- Final Message -->
+<div class="screen" id="final">
+  <h2>You said YES! 💖</h2>
+  <p>You just made me the happiest person alive<br>I’ll love every version of you — not just the strong one, but even the broken, silent, or tired one <br>ratan <br>mai kabhi bhi perfect nhi thi... na apne face se na apni life se shayd isiliye tu merse alg ho gaya ya shayd tu khud bhi confuse tha <br> i know mai utni acchi nahi hu jitni tu deserve karta hai but mai terko sach me bohot jyaada pyaar karti hu or hamesha karti rahungi <br> mai bas ye janna chahati hu ki kya ham dobara ekk baar relationship me aa sakte hai ? mai direct nahi bol paa rhi thi toh sochha is tarah bol du <br> i really love you 🥺 .</p>
+</div>
+
+<script>
+  const correctPassword = "ratan";
+  let heartClicks = 0;
+  let correctItems = ["item1", "item2", "item3"];
+  let droppedItems = [];
+  let flipped = [], matched = 0;
+  const reasons = [
+    "I’m not perfect, but one thing I promise — my loyalty is real, and my love is yours, only yours",
+    "My heart knows one truth — no one will ever love you like I do",
+    "Loving you means being honest. I’ll never lie or keep things from you",
+    "I might be ugly, but my heart’s loyal — and it only beats for you",
+    "You’re not just my first love… you’re the only one I’ll ever want",
+    "I don’t need expensive things… just your time, your love and you forever ",
+    "I don’t have beauty like others… but I have a heart that beats only for you",
+    "I’ll love you endlessly 💖"
+  ];
+  let reasonIndex = 0;
+
+  function checkPassword() {
+    const input = document.getElementById("passwordInput").value.toLowerCase();
+    if (input === correctPassword) {
+      document.getElementById("passwordScreen").classList.remove("active");
+      document.getElementById("level1").classList.add("active");
+      moveHeart();
+    } else {
+      document.getElementById("passwordMsg").innerText = "Nope, try again cutie 😘";
+    }
+  }
+
+  function clickHeart() {
+    heartClicks++;
+    document.getElementById("heartCount").innerText = `${heartClicks} / 15`;
+    moveHeart();
+    if (heartClicks >= 15) {
+      document.getElementById("level1").classList.remove("active");
+      startLevel2();
+    }
+  }
+
+  function moveHeart() {
+    const heart = document.getElementById("heart");
+    heart.style.left = Math.random() * (window.innerWidth - 50) + "px";
+    heart.style.top = Math.random() * (window.innerHeight - 50) + "px";
+  }
+
+  function startLevel2() {
+    document.getElementById("level2").classList.add("active");
+    const board = document.getElementById("emojiBoard");
+    board.innerHTML = "";
+    const emojis = ["💘", "🥹", "😍", "❤️", "🫀", "😻"];
+    const pairs = [...emojis, ...emojis].sort(() => 0.5 - Math.random());
+    flipped = [];
+    matched = 0;
+
+    pairs.forEach((emoji, index) => {
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerText = "❓";
+      card.dataset.emoji = emoji;
+      card.dataset.index = index;
+      card.onclick = () => flipCard(card);
+      board.appendChild(card);
+    });
+  }
+
+  function flipCard(card) {
+    if (flipped.length === 2 || flipped.includes(card) || card.classList.contains("matched")) return;
+    card.innerText = card.dataset.emoji;
+    flipped.push(card);
+    if (flipped.length === 2) {
+      setTimeout(() => {
+        const [c1, c2] = flipped;
+        if (c1.dataset.emoji === c2.dataset.emoji) {
+          c1.classList.add("matched");
+          c2.classList.add("matched");
+          matched++;
+          if (matched === 6) {
+            document.getElementById("matchMsg").innerText = "You matched my heart! 💖";
+            setTimeout(() => {
+              document.getElementById("level2").classList.remove("active");
+              document.getElementById("level3").classList.add("active");
+            }, 1500);
+          }
+        } else {
+          c1.innerText = "❓";
+          c2.innerText = "❓";
+        }
+        flipped = [];
+      }, 800);
+    }
+  }
+
+  function allowDrop(e) {
+    e.preventDefault();
+  }
+
+  function drag(e) {
+    e.dataTransfer.setData("text", e.target.id);
+  }
+
+  function drop(e) {
+    e.preventDefault();
+    const data = e.dataTransfer.getData("text");
+    const dropZone = document.getElementById("dropZone");
+    const item = document.getElementById(data);
+
+    if (!dropZone.contains(item)) {
+      dropZone.appendChild(item);
+
+      if (!droppedItems.includes(data)) {
+        droppedItems.push(data);
+      }
+
+      const correctDropped = droppedItems.filter(id => correctItems.includes(id));
+      const incorrectDropped = droppedItems.filter(id => !correctItems.includes(id));
+
+      if (incorrectDropped.length > 0) {
+        document.getElementById("dropMsg").innerText = "Hmm… not really 😅";
+      } else {
+        document.getElementById("dropMsg").innerText = "";
+      }
+
+      if (correctDropped.length === 3) {
+        document.getElementById("dropMsg").innerText = "Aww you know me so well! 💖 but i love you the most😭";
+        setTimeout(() => {
+          document.getElementById("level3").classList.remove("active");
+          document.getElementById("level8").classList.add("active");
+        }, 1500);
+      }
+    }
+  }
+
+  function showNextReason() {
+    if (reasonIndex < reasons.length) {
+      document.getElementById("reasonText").innerText = reasons[reasonIndex];
+      reasonIndex++;
+    } else {
+      document.getElementById("level8").classList.remove("active");
+      document.getElementById("finalProposal").classList.add("active");
+    }
+  }
+
+  function finalYes() {
+    document.getElementById("finalProposal").classList.remove("active");
+    document.getElementById("final").classList.add("active");
+  }
+
+  function moveNo() {
+    const noBtn = document.getElementById("noBtn");
+    noBtn.style.top = Math.random() * 80 + "vh";
+    noBtn.style.left = Math.random() * 80 + "vw";
+  }
+</script>
+</body>
+</html>
